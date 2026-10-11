@@ -1,7 +1,6 @@
-algoritmo "Algoritmo Desafio - ArenaCode"
+algoritmo "desafio"
 // Disciplina  : Algoritmo e Lógica de Programação 
 // Professor   : André Olímpio 
-// Aluno : Bruna Arisa Saito - 2UNB
 // Desafio 1° bimestre - ArenaCode
 
 const
@@ -30,18 +29,12 @@ var
    quantidadeEquipes, totalPartidas: inteiro
    opcao: inteiro
 
-// A matriz guarda:
-// 0 = confronto ainda nao realizado
-// 1 = equipe da linha venceu
-// 2 = equipe da coluna venceu
-// 3 = empate
-// O resultado inverso e registrado na celula simetrica.
-
 funcao localizarEquipe(cod: inteiro): inteiro
 var
-   i: inteiro
+   i, localizarEquipe: inteiro
 inicio
    localizarEquipe <- 0
+
    para i de 1 ate quantidadeEquipes faca
       se equipes[i].codigo = cod entao
          localizarEquipe <- i
@@ -50,11 +43,15 @@ inicio
 fimfuncao
 
 funcao calcularSaldo(marcados, sofridos: inteiro): inteiro
+var
+   calcularSaldo: inteiro
 inicio
    calcularSaldo <- marcados - sofridos
 fimfuncao
 
 funcao calcularPontuacao(vit, emp: inteiro): inteiro
+var
+   calcularPontuacao: inteiro
 inicio
    calcularPontuacao <- (vit * PONTOS_VITORIA) + (emp * PONTOS_EMPATE)
 fimfuncao
@@ -89,7 +86,7 @@ fimprocedimento
 
 procedimento cadastrarEquipe
 var
-   codigoNovo, indice: inteiro
+   codigoNovo, indice, i, existeCodigo: inteiro
    nomeNovo, capitaoNovo: caractere
 inicio
    se quantidadeEquipes >= MAX_EQUIPES entao
@@ -100,13 +97,27 @@ inicio
       escreva("Informe um codigo inteiro positivo: ")
       leia(codigoNovo)
 
-      enquanto (codigoNovo <= 0) ou (localizarEquipe(codigoNovo) <> 0) faca
+      existeCodigo <- 0
+      para i de 1 ate quantidadeEquipes faca
+         se equipes[i].codigo = codigoNovo entao
+            existeCodigo <- 1
+         fimse
+      fimpara
+
+      enquanto (codigoNovo <= 0) ou (existeCodigo = 1) faca
          se codigoNovo <= 0 entao
             escreva("Codigo invalido. Digite um valor positivo: ")
          senao
             escreva("Esse codigo ja existe. Informe outro codigo: ")
          fimse
          leia(codigoNovo)
+
+         existeCodigo <- 0
+         para i de 1 ate quantidadeEquipes faca
+            se equipes[i].codigo = codigoNovo entao
+               existeCodigo <- 1
+            fimse
+         fimpara
       fimenquanto
 
       escreva("Nome da equipe: ")
@@ -154,21 +165,26 @@ inicio
          escreval("--------------------------------")
          escreval("Codigo: ", equipes[i].codigo, " | Nome: ", equipes[i].nome)
          escreval("Capitao: ", equipes[i].capitao)
-         escreval("Pontos: ", equipes[i].pontosCampeonato,
-                  " | Vitorias: ", equipes[i].vitorias,
-                  " | Empates: ", equipes[i].empates,
-                  " | Derrotas: ", equipes[i].derrotas)
+         escreval("Pontos: ", equipes[i].pontosCampeonato, " | Vitorias: ", equipes[i].vitorias, " | Empates: ", equipes[i].empates, " | Derrotas: ", equipes[i].derrotas)
       fimpara
    fimse
 fimprocedimento
 
 procedimento consultarEquipe
 var
-   cod, indice: inteiro
+   cod, indice, i: inteiro
 inicio
    escreva("Digite o codigo da equipe que deseja consultar: ")
    leia(cod)
-   indice <- localizarEquipe(cod)
+
+   indice <- 0
+
+   para i de 1 ate quantidadeEquipes faca
+      se equipes[i].codigo = cod entao
+         indice <- i
+      fimse
+   fimpara
+
    se indice = 0 entao
       escreval("Equipe nao encontrada.")
    senao
@@ -178,26 +194,45 @@ fimprocedimento
 
 procedimento registrarPartida
 var
-   cod1, cod2, i1, i2, placar1, placar2: inteiro
+   cod1, cod2, i1, i2, placar1, placar2, i: inteiro
 inicio
    escreval("")
    escreval("=== REGISTRAR PARTIDA ===")
    se quantidadeEquipes < 2 entao
       escreval("Cadastre pelo menos duas equipes antes de registrar partidas.")
    senao
+
       escreva("Codigo da primeira equipe: ")
       leia(cod1)
-      i1 <- localizarEquipe(cod1)
+
+      i1 <- 0
+      para i de 1 ate quantidadeEquipes faca
+         se equipes[i].codigo = cod1 entao
+            i1 <- i
+         fimse
+      fimpara
 
       enquanto i1 = 0 faca
          escreva("Equipe nao encontrada. Informe outro codigo: ")
          leia(cod1)
-         i1 <- localizarEquipe(cod1)
+
+         i1 <- 0
+         para i de 1 ate quantidadeEquipes faca
+            se equipes[i].codigo = cod1 entao
+               i1 <- i
+            fimse
+         fimpara
       fimenquanto
 
       escreva("Codigo da segunda equipe: ")
       leia(cod2)
-      i2 <- localizarEquipe(cod2)
+
+      i2 <- 0
+      para i de 1 ate quantidadeEquipes faca
+         se equipes[i].codigo = cod2 entao
+            i2 <- i
+         fimse
+      fimpara
 
       enquanto (i2 = 0) ou (i2 = i1) faca
          se i2 = i1 entao
@@ -205,10 +240,17 @@ inicio
          senao
             escreva("Equipe nao encontrada. Informe outro codigo: ")
          fimse
-         leia(cod2)
-         i2 <- localizarEquipe(cod2)
-      fimenquanto
 
+         leia(cod2)
+
+         i2 <- 0
+         para i de 1 ate quantidadeEquipes faca
+            se equipes[i].codigo = cod2 entao
+               i2 <- i
+            fimse
+         fimpara
+      fimenquanto
+      
       se matrizConfrontos[i1,i2] <> 0 entao
          escreval("Essas equipes ja possuem um confronto registrado.")
          escreval("O sistema nao permite registrar o mesmo confronto duas vezes.")
@@ -260,23 +302,19 @@ inicio
             fimse
          fimse
 
-         equipes[i1].saldo <- calcularSaldo(equipes[i1].pontosMarcados,
-                                            equipes[i1].pontosSofridos)
-         equipes[i2].saldo <- calcularSaldo(equipes[i2].pontosMarcados,
-                                            equipes[i2].pontosSofridos)
-         equipes[i1].pontosCampeonato <- calcularPontuacao(equipes[i1].vitorias,
-                                                           equipes[i1].empates)
-         equipes[i2].pontosCampeonato <- calcularPontuacao(equipes[i2].vitorias,
-                                                           equipes[i2].empates)
+         equipes[i1].saldo <- calcularSaldo(equipes[i1].pontosMarcados, equipes[i1].pontosSofridos)
+         equipes[i2].saldo <- calcularSaldo(equipes[i2].pontosMarcados, equipes[i2].pontosSofridos)
+         equipes[i1].pontosCampeonato <- calcularPontuacao(equipes[i1].vitorias, equipes[i1].empates)
+         equipes[i2].pontosCampeonato <- calcularPontuacao(equipes[i2].vitorias, equipes[i2].empates)
          totalPartidas <- totalPartidas + 1
          escreval("Partida registrada e estatisticas atualizadas.")
       fimse
    fimse
 fimprocedimento
 
-// Retorna verdadeiro quando a equipe A deve aparecer antes da equipe B.
-// Criterios: pontos, vitorias, saldo e pontos marcados, nessa ordem.
 funcao vemAntes(a, b: inteiro): logico
+var
+   vemAntes: logico
 inicio
    se equipes[a].pontosCampeonato > equipes[b].pontosCampeonato entao
       vemAntes <- verdadeiro
@@ -310,9 +348,6 @@ var
    i, j, k, auxiliarConfronto: inteiro
    auxiliar: TEquipe
 inicio
-   // Ordenacao por selecao: troca os registros e tambem as linhas/colunas
-   // correspondentes da matriz, para que cada confronto continue ligado
-   // as equipes corretas depois da mudanca de posicao.
    para i de 1 ate quantidadeEquipes - 1 faca
       para j de i + 1 ate quantidadeEquipes faca
          se vemAntes(j, i) entao
@@ -346,16 +381,9 @@ inicio
       ordenarClassificacao
       escreval("")
       escreval("========== CLASSIFICACAO GERAL ==========")
-      escreval("Pos.  Equipe                 P   V   E   D   PM  PS  SG")
+      escreval("Pos. Equipe P    V    E    D    PM   PS   SG")
       para i de 1 ate quantidadeEquipes faca
-         escreval(i, "     ", equipes[i].nome, "   ",
-                  equipes[i].pontosCampeonato, "   ",
-                  equipes[i].vitorias, "   ",
-                  equipes[i].empates, "   ",
-                  equipes[i].derrotas, "   ",
-                  equipes[i].pontosMarcados, "   ",
-                  equipes[i].pontosSofridos, "   ",
-                  equipes[i].saldo)
+         escreval(i, "     ", equipes[i].nome, "   ", equipes[i].pontosCampeonato, "   ", equipes[i].vitorias, "   ", equipes[i].empates, "   ", equipes[i].derrotas, "   ", equipes[i].pontosMarcados, "   ", equipes[i].pontosSofridos, "   ", equipes[i].saldo)
       fimpara
    fimse
 fimprocedimento
@@ -418,20 +446,15 @@ inicio
 
       se totalPartidas > 0 entao
          mediaPontos <- somaPontos / totalPartidas
-         escreval("Media de pontos marcados por partida (somando as duas equipes): ",
-                  mediaPontos:0:2)
+         escreval("Media de pontos marcados por partida (somando as duas equipes): ", mediaPontos:0:2)
       senao
          escreval("Media de pontos marcados por partida: ainda nao ha partidas.")
       fimse
 
-      escreval("Mais vitorias: ", equipes[indiceVitorias].nome,
-               " (", maiorVitorias, ")")
-      escreval("Maior pontuacao no campeonato: ", equipes[indicePontuacao].nome,
-               " (", maiorPontuacao, " pontos)")
-      escreval("Maior saldo: ", equipes[indiceSaldo].nome,
-               " (", maiorSaldo, ")")
-      escreval("Mais pontos marcados: ", equipes[indiceMarcados].nome,
-               " (", maiorMarcados, ")")
+      escreval("Mais vitorias: ", equipes[indiceVitorias].nome, " (", maiorVitorias, ")")
+      escreval("Maior pontuacao no campeonato: ", equipes[indicePontuacao].nome, " (", maiorPontuacao, " pontos)")
+      escreval("Maior saldo: ", equipes[indiceSaldo].nome, " (", maiorSaldo, ")")
+      escreval("Mais pontos marcados: ", equipes[indiceMarcados].nome, " (", maiorMarcados, ")")
    senao
       escreval("Cadastre equipes para calcular as estatisticas.")
    fimse
