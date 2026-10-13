@@ -5,7 +5,7 @@ algoritmo "desafio"
 
 const
    MAX_EQUIPES = 10
-   PONTOS_VITORIA = 3
+   PONTOS_VITORIA = 5
    PONTOS_EMPATE = 1
    PONTOS_DERROTA = 0
 
@@ -31,29 +31,33 @@ var
 
 funcao localizarEquipe(cod: inteiro): inteiro
 var
-   i, localizarEquipe: inteiro
+   i, posicaoEncontrada: inteiro
 inicio
-   localizarEquipe <- 0
+   posicaoEncontrada <- 0
 
    para i de 1 ate quantidadeEquipes faca
       se equipes[i].codigo = cod entao
-         localizarEquipe <- i
+         posicaoEncontrada <- i
       fimse
    fimpara
+
+   retorne posicaoEncontrada
 fimfuncao
 
 funcao calcularSaldo(marcados, sofridos: inteiro): inteiro
 var
-   calcularSaldo: inteiro
+   saldo: inteiro
 inicio
-   calcularSaldo <- marcados - sofridos
+   saldo <- marcados - sofridos
+   retorne saldo
 fimfuncao
 
 funcao calcularPontuacao(vit, emp: inteiro): inteiro
 var
-   calcularPontuacao: inteiro
+   pontuacao: inteiro
 inicio
-   calcularPontuacao <- (vit * PONTOS_VITORIA) + (emp * PONTOS_EMPATE)
+   pontuacao <- (vit * PONTOS_VITORIA) + (emp * PONTOS_EMPATE)
+   retorne pontuacao
 fimfuncao
 
 procedimento inicializarSistema
@@ -154,7 +158,7 @@ fimprocedimento
 
 procedimento listarEquipes
 var
-   i: inteiro
+   i, partidas: inteiro
 inicio
    escreval("")
    escreval("=== EQUIPES CADASTRADAS ===")
@@ -162,10 +166,18 @@ inicio
       escreval("Nenhuma equipe cadastrada.")
    senao
       para i de 1 ate quantidadeEquipes faca
+         partidas <- equipes[i].vitorias + equipes[i].empates + equipes[i].derrotas
          escreval("--------------------------------")
          escreval("Codigo: ", equipes[i].codigo, " | Nome: ", equipes[i].nome)
          escreval("Capitao: ", equipes[i].capitao)
-         escreval("Pontos: ", equipes[i].pontosCampeonato, " | Vitorias: ", equipes[i].vitorias, " | Empates: ", equipes[i].empates, " | Derrotas: ", equipes[i].derrotas)
+         escreval("Partidas: ", partidas)
+         escreval("Vitorias: ", equipes[i].vitorias)
+         escreval("Empates: ", equipes[i].empates)
+         escreval("Derrotas: ", equipes[i].derrotas)
+         escreval("Pontos marcados: ", equipes[i].pontosMarcados)
+         escreval("Pontos sofridos: ", equipes[i].pontosSofridos)
+         escreval("Saldo de pontos: ", equipes[i].saldo)
+         escreval("Pontuacao no campeonato: ", equipes[i].pontosCampeonato)
       fimpara
    fimse
 fimprocedimento
@@ -197,6 +209,11 @@ var
    cod1, cod2, i1, i2, placar1, placar2, i: inteiro
 inicio
    escreval("")
+   // 0 -> confronto ainda não realizado
+   // 1 -> equipe da linha venceu
+   // 2 -> equipe da coluna venceu
+   // 3 -> empate
+
    escreval("=== REGISTRAR PARTIDA ===")
    se quantidadeEquipes < 2 entao
       escreval("Cadastre pelo menos duas equipes antes de registrar partidas.")
@@ -301,7 +318,7 @@ inicio
                escreval("Resultado: empate!")
             fimse
          fimse
-
+         
          equipes[i1].saldo <- calcularSaldo(equipes[i1].pontosMarcados, equipes[i1].pontosSofridos)
          equipes[i2].saldo <- calcularSaldo(equipes[i2].pontosMarcados, equipes[i2].pontosSofridos)
          equipes[i1].pontosCampeonato <- calcularPontuacao(equipes[i1].vitorias, equipes[i1].empates)
@@ -314,33 +331,33 @@ fimprocedimento
 
 funcao vemAntes(a, b: inteiro): logico
 var
-   vemAntes: logico
+   resultado: logico
 inicio
+   resultado <- falso
+
    se equipes[a].pontosCampeonato > equipes[b].pontosCampeonato entao
-      vemAntes <- verdadeiro
+      resultado <- verdadeiro
    senao
-      se equipes[a].pontosCampeonato < equipes[b].pontosCampeonato entao
-         vemAntes <- falso
-      senao
+      se equipes[a].pontosCampeonato = equipes[b].pontosCampeonato entao
          se equipes[a].vitorias > equipes[b].vitorias entao
-            vemAntes <- verdadeiro
+            resultado <- verdadeiro
          senao
-            se equipes[a].vitorias < equipes[b].vitorias entao
-               vemAntes <- falso
-            senao
+            se equipes[a].vitorias = equipes[b].vitorias entao
                se equipes[a].saldo > equipes[b].saldo entao
-                  vemAntes <- verdadeiro
+                  resultado <- verdadeiro
                senao
-                  se equipes[a].saldo < equipes[b].saldo entao
-                     vemAntes <- falso
-                  senao
-                     vemAntes <- equipes[a].pontosMarcados > equipes[b].pontosMarcados
+                  se equipes[a].saldo = equipes[b].saldo entao
+                     se equipes[a].pontosMarcados > equipes[b].pontosMarcados entao
+                        resultado <- verdadeiro
+                     fimse
                   fimse
                fimse
             fimse
          fimse
       fimse
    fimse
+
+   retorne resultado
 fimfuncao
 
 procedimento ordenarClassificacao
